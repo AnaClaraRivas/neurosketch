@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
@@ -9,6 +10,9 @@ class UploadPage extends StatefulWidget {
 
 class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
   late AnimationController _borderController;
+
+  XFile? _image;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -24,6 +28,34 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
   void dispose() {
     _borderController.dispose();
     super.dispose();
+  }
+
+  // 📸 FOTO
+  Future<void> _tirarFoto() async {
+    final XFile? foto = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 70,
+    );
+
+    if (foto != null) {
+      setState(() {
+        _image = foto;
+      });
+    }
+  }
+
+  // 🖼️ GALERIA
+  Future<void> _escolherGaleria() async {
+    final XFile? imagem = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (imagem != null) {
+      setState(() {
+        _image = imagem;
+      });
+    }
   }
 
   @override
@@ -80,11 +112,16 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
                                 120,
                                 149,
                               ).withOpacity(0.2),
-                              child: const Icon(
-                                Icons.add_a_photo,
-                                size: 40,
-                                color: Color.fromARGB(255, 255, 120, 149),
-                              ),
+                              backgroundImage: _image != null
+                                  ? NetworkImage(_image!.path)
+                                  : null,
+                              child: _image == null
+                                  ? const Icon(
+                                      Icons.add_a_photo,
+                                      size: 40,
+                                      color: Color.fromARGB(255, 255, 120, 149),
+                                    )
+                                  : null,
                             ),
                             const SizedBox(height: 15),
                             const Text(
@@ -104,7 +141,7 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 30),
 
-                      // 📸 BOTÃO
+                      // 📸 BOTÃO FOTO
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(
@@ -119,7 +156,7 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: _tirarFoto,
                         icon: const Icon(Icons.camera_alt, color: Colors.white),
                         label: const Text(
                           "Tirar Foto do Desenho",
@@ -130,15 +167,18 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
                       const SizedBox(height: 20),
 
                       // 🖼️ GALERIA
-                      AnimatedBorderBox(
-                        controller: _borderController,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.image),
-                            SizedBox(width: 10),
-                            Text("Escolher da Galeria"),
-                          ],
+                      GestureDetector(
+                        onTap: _escolherGaleria,
+                        child: AnimatedBorderBox(
+                          controller: _borderController,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.image),
+                              SizedBox(width: 10),
+                              Text("Escolher da Galeria"),
+                            ],
+                          ),
                         ),
                       ),
 
@@ -181,24 +221,40 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
                             ),
                             SizedBox(width: 15),
                             Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Desenhos Anteriores",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text("Veja análises já realizadas!"),
-                                ],
+                              child: Text(
+                                "Desenhos serão salvos automaticamente",
                               ),
                             ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 20),
+
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 255, 120, 149),
+                          padding: const EdgeInsets.symmetric(vertical: 18),
+                          minimumSize: const Size(double.infinity, 50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        onPressed: _image == null
+                            ? null // desativa se não tiver imagem
+                            : () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ProximaPage(),
+                                  ),
+                                );
+                              },
+                        child: const Text(
+                          "Próximo",
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -211,6 +267,50 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
   }
 }
 
+class ProximaPage extends StatelessWidget {
+  const ProximaPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Próxima Página")),
+      body: const Center(child: Text("Aqui vai a análise do desenho")),
+    );
+  }
+}
+
+// ================= COMPONENTES =================
+
+// FUNDO
+class IconBackground extends StatelessWidget {
+  const IconBackground({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: const [
+        Positioned(top: 100, left: 30, child: BgIcon(Icons.psychology)),
+        Positioned(top: 200, right: 40, child: BgIcon(Icons.favorite)),
+        Positioned(top: 350, left: 60, child: BgIcon(Icons.psychology)),
+        Positioned(top: 500, right: 50, child: BgIcon(Icons.favorite)),
+        Positioned(top: 650, left: 80, child: BgIcon(Icons.psychology)),
+      ],
+    );
+  }
+}
+
+class BgIcon extends StatelessWidget {
+  final IconData icon;
+
+  const BgIcon(this.icon, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Icon(icon, size: 60, color: const Color.fromARGB(30, 0, 0, 0));
+  }
+}
+
+// BORDA ANIMADA
 class AnimatedBorderBox extends StatelessWidget {
   final Widget child;
   final AnimationController controller;
@@ -250,7 +350,6 @@ class AnimatedBorderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    const radius = 20.0;
     const dashWidth = 10.0;
     const dashSpace = 6.0;
 
@@ -259,12 +358,10 @@ class AnimatedBorderPainter extends CustomPainter {
       ..strokeWidth = 3
       ..style = PaintingStyle.stroke;
 
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      const Radius.circular(radius),
-    );
+    final rect = Offset.zero & size;
+    final path = Path()
+      ..addRRect(RRect.fromRectAndRadius(rect, const Radius.circular(20)));
 
-    final path = Path()..addRRect(rrect);
     final metrics = path.computeMetrics();
 
     for (var metric in metrics) {
@@ -272,7 +369,6 @@ class AnimatedBorderPainter extends CustomPainter {
 
       while (distance < metric.length) {
         final extractPath = metric.extractPath(distance, distance + dashWidth);
-
         canvas.drawPath(extractPath, paint);
         distance += dashWidth + dashSpace;
       }
@@ -281,32 +377,4 @@ class AnimatedBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant AnimatedBorderPainter oldDelegate) => true;
-}
-
-class IconBackground extends StatelessWidget {
-  const IconBackground({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: const [
-        Positioned(top: 100, left: 30, child: BgIcon(Icons.psychology)),
-        Positioned(top: 200, right: 40, child: BgIcon(Icons.favorite)),
-        Positioned(top: 350, left: 60, child: BgIcon(Icons.psychology)),
-        Positioned(top: 500, right: 50, child: BgIcon(Icons.favorite)),
-        Positioned(top: 650, left: 80, child: BgIcon(Icons.psychology)),
-      ],
-    );
-  }
-}
-
-class BgIcon extends StatelessWidget {
-  final IconData icon;
-
-  const BgIcon(this.icon, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(icon, size: 60, color: Color.fromARGB(30, 0, 0, 0));
-  }
 }
