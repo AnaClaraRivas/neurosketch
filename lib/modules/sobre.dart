@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'telaenviar.dart'; 
+import 'telaenviar.dart';
 
 class SobrePage extends StatelessWidget {
   const SobrePage({super.key});
@@ -47,20 +47,17 @@ class SobrePage extends StatelessWidget {
                       const SizedBox(height: 30),
 
                       _CardInfo(
-                        color: Colors.pink.shade100,
+                        color: const Color.fromARGB(255, 255, 229, 238),
                         icon: Icons.psychology,
                         title: "Como Funcionam as Diferenças Cognitivas",
                         text:
-                            "Doenças ou deficiências cognitivas são condições que dificultam o aprendizado, o raciocínio, a memória e a compreensão de informações.\n\n"
-                            "Elas podem surgir por fatores genéticos, neurológicos ou pelo desenvolvimento atípico.\n\n"
-                            "A neurodivergência, por sua vez, é um termo mais amplo que descreve maneiras diferentes de o cérebro funcionar, como no TDAH, autismo e dislexia.\n\n"
-                            "Nem toda neurodivergência é uma deficiência cognitiva — algumas pessoas têm apenas um jeito diferente de pensar —, mas certas neurodivergências podem envolver dificuldades cognitivas.\n\n"
-                            "Assim, a neurodivergência inclui tanto condições que causam limitações quanto diferenças que não são doenças.",
+                            "Doenças ou deficiências cognitivas são condições que dificultam o aprendizado, o raciocínio, a memória e a compreensão de informações. Elas podem surgir por fatores genéticos, neurológicos ou pelo desenvolvimento atípico. A neurodivergência, por sua vez, é um termo mais amplo que descreve maneiras diferentes de o cérebro funcionar, como no TDAH, autismo e dislexia. Nem toda neurodivergência é uma deficiência cognitiva — algumas pessoas têm apenas um jeito diferente de pensar —, mas certas neurodivergências podem envolver dificuldades cognitivas. Assim, a neurodivergência inclui tanto condições que causam limitações quanto diferenças que não são doenças.",
                       ),
 
                       const SizedBox(height: 25),
 
                       _buildSection("Autismo (TEA)", Colors.pink.shade200, [
+                        "Padrões comuns no desenho:",
                         "Padrões repetitivos",
                         "Foco em detalhes",
                         "Preferência por simetria",
