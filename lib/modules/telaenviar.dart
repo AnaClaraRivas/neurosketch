@@ -31,7 +31,6 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  // 📸 FOTO
   Future<void> _tirarFoto() async {
     final XFile? foto = await _picker.pickImage(
       source: ImageSource.camera,
@@ -45,7 +44,6 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
     }
   }
 
-  // 🖼️ GALERIA
   Future<void> _escolherGaleria() async {
     final XFile? imagem = await _picker.pickImage(
       source: ImageSource.gallery,
@@ -100,7 +98,6 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 30),
 
-                      // 📦 BOX PRINCIPAL
                       AnimatedBorderBox(
                         controller: _borderController,
                         child: Column(
