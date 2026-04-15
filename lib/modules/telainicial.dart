@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     const SizedBox(height: 15),
 
                     const Text(
-                      "NeuroSketch",
+                      "NeuroSketchh",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 34,
