@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'telaenviar.dart';
 import 'sobre.dart';
 
-// 👉 IMPORTANTE: reutiliza os mesmos componentes da UploadPage
-// então NÃO precisa recriar AnimatedBorderBox se estiver no mesmo projeto
 
 class ResultPage extends StatefulWidget {
   const ResultPage({super.key});
@@ -53,7 +51,6 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      // 🔝 TOP BAR
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -74,7 +71,6 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 30),
 
-                      // 🖼️ IMAGEM (FAKE POR ENQUANTO)
                       AnimatedBorderBox(
                         controller: _borderController,
                         child: Column(
@@ -108,7 +104,6 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 25),
 
-                      // 🔘 TABS
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -193,7 +188,6 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 25),
 
-                      // 🔥 CONTEÚDO DINÂMICO
                       mostrarResultados
                           ? Column(
                               children: [
@@ -273,7 +267,6 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 30),
 
-                      // 🔵 BOTÃO
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(
@@ -304,7 +297,6 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 15),
 
-                      // ⚪ VOLTAR
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Container(
@@ -331,7 +323,6 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
   }
 }
 
-// 🔹 LEGEND
 class _Legend extends StatelessWidget {
   final Color color;
   final String text;
