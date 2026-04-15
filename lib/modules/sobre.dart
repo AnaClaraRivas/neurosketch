@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'telaenviar.dart'; // 👈 para usar o IconBackground
+import 'telaenviar.dart'; 
 
 class SobrePage extends StatelessWidget {
   const SobrePage({super.key});
@@ -26,7 +26,6 @@ class SobrePage extends StatelessWidget {
                     children: [
                       const SizedBox(height: 10),
 
-                      // 🔝 TOP BAR
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -95,7 +94,6 @@ class SobrePage extends StatelessWidget {
     );
   }
 
-  // 🔹 SEÇÕES
   Widget _buildSection(String title, Color color, List<String> items) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -147,7 +145,6 @@ class SobrePage extends StatelessWidget {
   }
 }
 
-// 🔹 CARD PRINCIPAL
 class _CardInfo extends StatelessWidget {
   final Color color;
   final IconData icon;
