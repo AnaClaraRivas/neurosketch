@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'paginaresultado.dart';
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
@@ -78,7 +79,7 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      // 🔝 TOP BAR
+                      // TOP BAR
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -141,7 +142,7 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 30),
 
-                      // 📸 BOTÃO FOTO
+                      // BOTÃO FOTO
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(
@@ -166,7 +167,7 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 20),
 
-                      // 🖼️ GALERIA
+                      // GALERIA
                       GestureDetector(
                         onTap: _escolherGaleria,
                         child: AnimatedBorderBox(
@@ -184,7 +185,6 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 30),
 
-                      // 💡 DICA
                       AnimatedBorderBox(
                         controller: _borderController,
                         color: Colors.amber,
@@ -206,7 +206,6 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 20),
 
-                      // 🕒 HISTÓRICO
                       AnimatedBorderBox(
                         controller: _borderController,
                         color: Colors.blue,
@@ -246,7 +245,7 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ProximaPage(),
+                                    builder: (context) => const ResultPage(),
                                   ),
                                 );
                               },
@@ -279,9 +278,7 @@ class ProximaPage extends StatelessWidget {
   }
 }
 
-// ================= COMPONENTES =================
-
-// FUNDO
+// componentes
 class IconBackground extends StatelessWidget {
   const IconBackground({super.key});
 
@@ -310,7 +307,6 @@ class BgIcon extends StatelessWidget {
   }
 }
 
-// BORDA ANIMADA
 class AnimatedBorderBox extends StatelessWidget {
   final Widget child;
   final AnimationController controller;
