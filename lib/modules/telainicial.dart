@@ -47,6 +47,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: Colors.white,
+
+      // 🔥 MENU AQUI
+      drawer: const AppMenu(),
+
       body: Stack(
         children: [
           const Positioned.fill(child: IconBackground()),
@@ -58,15 +62,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    const SizedBox(height: 60),
+                    const SizedBox(height: 40),
 
-                    // icone animado
+                    // 🔥 BOTÃO MENU
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Builder(
+                          builder: (context) => IconButton(
+                            icon: const Icon(Icons.menu),
+                            onPressed: () {
+                              Scaffold.of(context).openDrawer();
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 48),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // ícone animado
                     AnimatedBuilder(
                       animation: _iconAnimation,
                       builder: (context, child) {
                         return Transform.scale(
                           scale: _iconAnimation.value,
-                          child: Icon(
+                          child: const Icon(
                             Icons.psychology,
                             size: 140,
                             color: Color.fromARGB(255, 255, 120, 149),
@@ -89,7 +111,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                     const SizedBox(height: 50),
 
-                    // borda animada
                     AnimatedBorderBox(
                       controller: _borderController,
                       child: const Text(
@@ -100,7 +121,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                     const SizedBox(height: 30),
 
-                    // botão
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(
@@ -123,7 +143,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           ),
                         );
                       },
-                      icon: Icon(Icons.camera_alt, color: Colors.white),
+                      icon: const Icon(Icons.camera_alt, color: Colors.white),
                       label: const Text(
                         "Enviar Desenho",
                         style: TextStyle(fontSize: 18, color: Colors.white),
@@ -134,7 +154,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                     infoCard(
                       icon: Icons.info,
-                      color: Color.fromARGB(255, 148, 238, 125),
+                      color: const Color.fromARGB(255, 148, 238, 125),
                       title: "Sobre Neurodivergência",
                       subtitle: "Aprenda sobre Autismo, TDAH e dislexia",
                     ),
@@ -143,7 +163,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                     infoCard(
                       icon: Icons.access_time,
-                      color: Color.fromARGB(255, 87, 204, 239),
+                      color: const Color.fromARGB(255, 87, 204, 239),
                       title: "Desenhos Anteriores",
                       subtitle: "Veja análises já realizadas!",
                     ),
@@ -193,105 +213,98 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 }
 
-// borda animada
-class AnimatedBorderBox extends StatelessWidget {
-  final Widget child;
-  final AnimationController controller;
-  final Color color;
-
-  const AnimatedBorderBox({
-    super.key,
-    required this.child,
-    required this.controller,
-    this.color = Colors.grey,
-  });
+class AppMenu extends StatelessWidget {
+  const AppMenu({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, childWidget) {
-        return CustomPaint(
-          painter: AnimatedBorderPainter(color, controller.value),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            child: childWidget,
+    return Drawer(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          bottomLeft: Radius.circular(30),
+        ),
+      ),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          // HEADER BONITO
+          Container(
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+            decoration: const BoxDecoration(
+              color: Color.fromARGB(255, 255, 120, 149),
+            ),
+            child: Row(
+              children: const [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.white,
+                  child: Icon(
+                    Icons.psychology,
+                    color: Color.fromARGB(255, 255, 120, 149),
+                  ),
+                ),
+                SizedBox(width: 15),
+                Text(
+                  "NeuroSketchh",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
-      },
-      child: child,
+
+          const SizedBox(height: 10),
+
+          // INÍCIO
+          ListTile(
+            leading: const Icon(Icons.home),
+            title: const Text("Início"),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.popUntil(context, (route) => route.isFirst);
+            },
+          ),
+
+          // ENVIAR DESENHO
+          ListTile(
+            leading: const Icon(Icons.camera_alt),
+            title: const Text("Enviar Desenho"),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            onTap: () {
+              Navigator.pop(context); // fecha o menu primeiro
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UploadPage()),
+              );
+            },
+          ),
+
+          // DIVISOR BONITO
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Divider(),
+          ),
+
+          // SOBRE
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text("Sobre"),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            onTap: () {},
+          ),
+        ],
+      ),
     );
-  }
-}
-
-// painter
-class AnimatedBorderPainter extends CustomPainter {
-  final Color color;
-  final double animationValue;
-
-  AnimatedBorderPainter(this.color, this.animationValue);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const radius = 20.0;
-    const dashWidth = 10.0;
-    const dashSpace = 6.0;
-
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke;
-
-    final rrect = RRect.fromRectAndRadius(
-      Offset.zero & size,
-      const Radius.circular(radius),
-    );
-
-    final path = Path()..addRRect(rrect);
-    final metrics = path.computeMetrics();
-
-    for (var metric in metrics) {
-      double distance = animationValue * (dashWidth + dashSpace);
-
-      while (distance < metric.length) {
-        final extractPath = metric.extractPath(distance, distance + dashWidth);
-
-        canvas.drawPath(extractPath, paint);
-        distance += dashWidth + dashSpace;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant AnimatedBorderPainter oldDelegate) => true;
-}
-
-// fundo com icons
-class IconBackground extends StatelessWidget {
-  const IconBackground({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: const [
-        Positioned(top: 100, left: 30, child: BgIcon(Icons.psychology)),
-        Positioned(top: 200, right: 40, child: BgIcon(Icons.favorite)),
-        Positioned(top: 350, left: 60, child: BgIcon(Icons.psychology)),
-        Positioned(top: 500, right: 50, child: BgIcon(Icons.favorite)),
-        Positioned(top: 650, left: 80, child: BgIcon(Icons.psychology)),
-      ],
-    );
-  }
-}
-
-class BgIcon extends StatelessWidget {
-  final IconData icon;
-
-  const BgIcon(this.icon, {super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(icon, size: 60, color: Color.fromARGB(10, 0, 0, 0));
   }
 }
