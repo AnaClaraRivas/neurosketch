@@ -1,8 +1,34 @@
 import 'package:flutter/material.dart';
+import '../widgets/app_scaffold.dart';
+import 'paginaresultado.dart';
 import 'telaenviar.dart';
 
-class SobrePage extends StatelessWidget {
+class SobrePage extends StatefulWidget {
   const SobrePage({super.key});
+
+  @override
+  State<SobrePage> createState() => _SobrePageState();
+}
+
+class _SobrePageState extends State<SobrePage>
+    with TickerProviderStateMixin {
+  late AnimationController _borderController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _borderController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _borderController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -10,8 +36,7 @@ class SobrePage extends StatelessWidget {
     bool isDesktop = width > 800;
     double maxWidth = isDesktop ? 500 : double.infinity;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return AppScaffold(
       body: Stack(
         children: [
           const Positioned.fill(child: IconBackground()),
@@ -27,56 +52,60 @@ class SobrePage extends StatelessWidget {
                       const SizedBox(height: 10),
 
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.arrow_back),
                             onPressed: () => Navigator.pop(context),
                           ),
-                          const Text(
-                            "Sobre",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Icon(Icons.menu),
                         ],
                       ),
 
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 10),
 
-                      _CardInfo(
-                        color: const Color.fromARGB(255, 255, 229, 238),
-                        icon: Icons.psychology,
-                        title: "Como Funcionam as Diferenças Cognitivas",
-                        text:
-                            "Doenças ou deficiências cognitivas são condições que dificultam o aprendizado, o raciocínio, a memória e a compreensão de informações. Elas podem surgir por fatores genéticos, neurológicos ou pelo desenvolvimento atípico. A neurodivergência, por sua vez, é um termo mais amplo que descreve maneiras diferentes de o cérebro funcionar, como no TDAH, autismo e dislexia. Nem toda neurodivergência é uma deficiência cognitiva — algumas pessoas têm apenas um jeito diferente de pensar —, mas certas neurodivergências podem envolver dificuldades cognitivas. Assim, a neurodivergência inclui tanto condições que causam limitações quanto diferenças que não são doenças.",
+                      const Text(
+                        "Sobre Diferenças Cognitivas",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
 
                       const SizedBox(height: 25),
 
-                      _buildSection("Autismo (TEA)", Colors.pink.shade200, [
-                        "Padrões comuns no desenho:",
+                      // 🔥 CARD PRINCIPAL MAIS SUAVE
+                      AnimatedBorderBox(
+                        controller: _borderController,
+                        child: _CardInfo(
+                          color: const Color.fromARGB(226, 255, 188, 212),
+                          icon: Icons.psychology,
+                          title: "Entendendo o tema",
+                          text:
+                              "Diferenças cognitivas são formas variadas de funcionamento do cérebro. Algumas condições podem trazer dificuldades no aprendizado, memória ou organização, enquanto outras representam apenas maneiras diferentes de pensar.\n\nA neurodivergência inclui condições como TDAH, autismo e dislexia — nem todas são deficiências, mas todas representam diversidade.",
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      _buildSection("Autismo (TEA)", Colors.pink, [
                         "Padrões repetitivos",
-                        "Foco em detalhes",
-                        "Preferência por simetria",
+                        "Foco intenso em detalhes",
+                        "Preferência por organização",
                       ]),
 
-                      _buildSection("TDAH", Colors.yellow.shade200, [
-                        "Mudança de ideias",
+                      _buildSection("TDAH", Colors.amber, [
+                        "Mudança rápida de ideias",
                         "Impulsividade",
-                        "Desorganização",
+                        "Dificuldade de foco",
                       ]),
 
-                      _buildSection("Dislexia", Colors.green.shade200, [
-                        "Inversão de formas",
-                        "Dificuldade visual",
+                      _buildSection("Dislexia", Colors.green, [
+                        "Troca ou inversão de letras",
+                        "Dificuldade de leitura",
                       ]),
 
-                      _buildSection("Dispraxia", Colors.blue.shade200, [
+                      _buildSection("Dispraxia", Colors.blue, [
+                        "Coordenação motora limitada",
                         "Traços irregulares",
-                        "Dificuldade motora",
                       ]),
 
                       const SizedBox(height: 40),
@@ -92,51 +121,48 @@ class SobrePage extends StatelessWidget {
   }
 
   Widget _buildSection(String title, Color color, List<String> items) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade400, width: 1.5),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: AnimatedBorderBox(
+        controller: _borderController,
+        color: color,
+        child: Container(
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.15),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(backgroundColor: color, radius: 8),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor: color.withOpacity(0.25),
+                    child: Icon(Icons.circle, color: color, size: 10),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              ...items.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text("• $e"),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.35),
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: items
-                  .map(
-                    (e) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Text("• $e"),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -162,7 +188,6 @@ class _CardInfo extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: Colors.pink, width: 1.5),
       ),
       child: Column(
         children: [

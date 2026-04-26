@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'telaenviar.dart';
+import '../widgets/app_scaffold.dart'; // ✅ agora com ;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -45,12 +46,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     bool isDesktop = width > 800;
     double maxWidth = isDesktop ? 500 : double.infinity;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-
-      // 🔥 MENU AQUI
-      drawer: const AppMenu(),
-
+    return AppScaffold( // ✅ USANDO O PADRÃO
       body: Stack(
         children: [
           const Positioned.fill(child: IconBackground()),
@@ -64,25 +60,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   children: [
                     const SizedBox(height: 40),
 
-                    // 🔥 BOTÃO MENU
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Builder(
-                          builder: (context) => IconButton(
-                            icon: const Icon(Icons.menu),
-                            onPressed: () {
-                              Scaffold.of(context).openDrawer();
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 48),
-                      ],
-                    ),
+                    // ❌ REMOVIDO botão manual do menu (AppScaffold já tem)
 
                     const SizedBox(height: 20),
 
-                    // ícone animado
                     AnimatedBuilder(
                       animation: _iconAnimation,
                       builder: (context, child) {
@@ -123,12 +104,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(
-                          255,
-                          255,
-                          120,
-                          149,
-                        ),
+                        backgroundColor: const Color.fromARGB(255, 255, 120, 149),
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         minimumSize: const Size(double.infinity, 50),
                         shape: RoundedRectangleBorder(
@@ -206,102 +182,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 Text(subtitle),
               ],
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class AppMenu extends StatelessWidget {
-  const AppMenu({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Drawer(
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          bottomLeft: Radius.circular(30),
-        ),
-      ),
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          // HEADER BONITO
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-            decoration: const BoxDecoration(
-              color: Color.fromARGB(255, 255, 120, 149),
-            ),
-            child: Row(
-              children: const [
-                CircleAvatar(
-                  radius: 25,
-                  backgroundColor: Colors.white,
-                  child: Icon(
-                    Icons.psychology,
-                    color: Color.fromARGB(255, 255, 120, 149),
-                  ),
-                ),
-                SizedBox(width: 15),
-                Text(
-                  "NeuroSketchh",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          // INÍCIO
-          ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text("Início"),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.popUntil(context, (route) => route.isFirst);
-            },
-          ),
-
-          // ENVIAR DESENHO
-          ListTile(
-            leading: const Icon(Icons.camera_alt),
-            title: const Text("Enviar Desenho"),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            onTap: () {
-              Navigator.pop(context); // fecha o menu primeiro
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const UploadPage()),
-              );
-            },
-          ),
-
-          // DIVISOR BONITO
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Divider(),
-          ),
-
-          // SOBRE
-          ListTile(
-            leading: const Icon(Icons.info),
-            title: const Text("Sobre"),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            onTap: () {},
           ),
         ],
       ),

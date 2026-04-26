@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'paginaresultado.dart';
+import '../widgets/app_scaffold.dart';
 
 class UploadPage extends StatefulWidget {
   const UploadPage({super.key});
@@ -63,9 +64,8 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
     bool isDesktop = width > 800;
     double maxWidth = isDesktop ? 500 : double.infinity;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
+return AppScaffold(
+  body: Stack(
         children: [
           const Positioned.fill(child: IconBackground()),
 
@@ -85,16 +85,22 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
                             icon: const Icon(Icons.arrow_back),
                             onPressed: () => Navigator.pop(context),
                           ),
-                          const Text(
-                            "Enviar Desenho",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Icon(Icons.menu),
+                          
                         ],
                       ),
+
+                      const SizedBox(height: 10),
+
+                      const Text(
+                        "Envie a Imagem!",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+                      
 
                       const SizedBox(height: 30),
 
@@ -242,8 +248,7 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ResultPage(),
-                                  ),
+                                    builder: (context) => ResultPage(image: _image!),                                  ),
                                 );
                               },
                         child: const Text(

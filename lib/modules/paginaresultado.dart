@@ -1,16 +1,23 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:image_picker/image_picker.dart';
 import 'telaenviar.dart';
+import 'telainicial.dart';
 import 'sobre.dart';
-
+import '../widgets/app_scaffold.dart';
 
 class ResultPage extends StatefulWidget {
-  const ResultPage({super.key});
+  final XFile image;
+
+  const ResultPage({super.key, required this.image});
 
   @override
   State<ResultPage> createState() => _ResultPageState();
 }
 
-class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
+class _ResultPageState extends State<ResultPage>
+    with TickerProviderStateMixin {
   late AnimationController _borderController;
 
   bool mostrarResultados = true;
@@ -37,8 +44,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     bool isDesktop = width > 800;
     double maxWidth = isDesktop ? 500 : double.infinity;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
+    return AppScaffold(
       body: Stack(
         children: [
           const Positioned.fill(child: IconBackground()),
@@ -52,50 +58,54 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
                   child: Column(
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           IconButton(
                             icon: const Icon(Icons.arrow_back),
                             onPressed: () => Navigator.pop(context),
                           ),
-                          const Text(
-                            "Resultado da Análise",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Icon(Icons.menu),
                         ],
                       ),
 
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 10),
 
+                      const Text(
+                        "Análise do Desenho",
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      // 🔥 IMAGEM
                       AnimatedBorderBox(
                         controller: _borderController,
                         child: Column(
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(20),
-                              child: Image.asset(
-                                "assets/desenho.png",
-                                height: 180,
-                                fit: BoxFit.cover,
-                              ),
+                              child: kIsWeb
+                                  ? Image.network(
+                                      widget.image.path,
+                                      height: 200,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Image.file(
+                                      File(widget.image.path),
+                                      height: 200,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    ),
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
-                                _Legend(
-                                  color: Colors.green,
-                                  text: "Padrão típico",
-                                ),
+                                _Legend(color: Colors.green, text: "Padrão típico"),
                                 SizedBox(width: 20),
-                                _Legend(
-                                  color: Colors.red,
-                                  text: "Merece atenção",
-                                ),
+                                _Legend(color: Colors.red, text: "Atenção"),
                               ],
                             ),
                           ],
@@ -104,177 +114,88 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 25),
 
+                      // 🔥 TOGGLE
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                          color: Colors.white.withOpacity(0.6),
                           borderRadius: BorderRadius.circular(30),
                         ),
                         child: Row(
                           children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    mostrarResultados = true;
-                                  });
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: mostrarResultados
-                                        ? const Color.fromARGB(
-                                            255,
-                                            255,
-                                            120,
-                                            149,
-                                          )
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      "Resultados",
-                                      style: TextStyle(
-                                        color: mostrarResultados
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    mostrarResultados = false;
-                                  });
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 10,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: !mostrarResultados
-                                        ? const Color.fromARGB(
-                                            255,
-                                            255,
-                                            120,
-                                            149,
-                                          )
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      "Explicação",
-                                      style: TextStyle(
-                                        color: !mostrarResultados
-                                            ? Colors.white
-                                            : Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
+                            _toggleButton("Resultados", true),
+                            _toggleButton("Explicação", false),
                           ],
                         ),
                       ),
 
                       const SizedBox(height: 25),
 
-                      mostrarResultados
-                          ? Column(
-                              children: [
-                                AnimatedBorderBox(
-                                  controller: _borderController,
-                                  color: Colors.green,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: const [
-                                      Text(
-                                        "Padrões Típicos Identificados",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        "• Uso consistente do espaço do papel\n"
-                                        "• Presença de padrões repetitivos naturais\n"
-                                        "• Coordenação motora adequada para a idade",
-                                      ),
+                      // 🔥 CONTEÚDO BONITO
+                      AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 300),
+                        child: mostrarResultados
+                            ? Column(
+                                key: const ValueKey(1),
+                                children: [
+                                  _contentBox(
+                                    color: Colors.green,
+                                    icon: Icons.check_circle,
+                                    title: "Pontos Positivos",
+                                    items: [
+                                      "Uso equilibrado do espaço",
+                                      "Boa repetição de padrões",
+                                      "Coordenação motora consistente",
+                                      "Distribuição organizada",
                                     ],
                                   ),
-                                ),
-                                const SizedBox(height: 20),
-                                AnimatedBorderBox(
-                                  controller: _borderController,
-                                  color: Colors.red,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: const [
-                                      Text(
-                                        "Pontos de Atenção",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(height: 10),
-                                      Text(
-                                        "• Concentração excessiva em uma área\n"
-                                        "• Sobreposição intensa de traços\n"
-                                        "• Possível dificuldade de organização visual",
-                                      ),
+                                  const SizedBox(height: 20),
+                                  _contentBox(
+                                    color: Colors.red,
+                                    icon: Icons.warning,
+                                    title: "Pontos de Atenção",
+                                    items: [
+                                      "Concentração em áreas específicas",
+                                      "Sobreposição de traços",
+                                      "Possível dificuldade de organização",
+                                      "Variação de pressão",
                                     ],
                                   ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              children: [
-                                AnimatedBorderBox(
-                                  controller: _borderController,
-                                  color: Colors.amber,
-                                  child: const Text(
-                                    "A análise avalia como a criança utiliza o espaço, "
-                                    "repete padrões e aplica força no traço. "
-                                    "Esses elementos ajudam a compreender aspectos "
-                                    "do desenvolvimento cognitivo e motor.",
+                                ],
+                              )
+                            : Column(
+                                key: const ValueKey(2),
+                                children: [
+                                  _contentBox(
+                                    color: Colors.amber,
+                                    icon: Icons.psychology,
+                                    title: "Como funciona",
+                                    description:
+                                        "A análise observa padrões no desenho como organização, repetição e controle do traço.\n\nEsses elementos ajudam a entender o desenvolvimento cognitivo.",
                                   ),
-                                ),
-                                const SizedBox(height: 20),
-                                AnimatedBorderBox(
-                                  controller: _borderController,
-                                  color: Colors.green,
-                                  child: const Text(
-                                    "Aspectos analisados:\n\n"
-                                    "• Organização espacial\n"
-                                    "• Padrões repetitivos\n"
-                                    "• Pressão do traço\n"
-                                    "• Controle motor",
+                                  const SizedBox(height: 20),
+                                  _contentBox(
+                                    color: Colors.blue,
+                                    icon: Icons.analytics,
+                                    title: "O que é analisado",
+                                    items: [
+                                      "Organização espacial",
+                                      "Repetição de padrões",
+                                      "Intensidade do traço",
+                                      "Controle motor",
+                                      "Distribuição visual",
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
+                      ),
 
                       const SizedBox(height: 30),
 
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(
-                            255,
-                            80,
-                            180,
-                            210,
-                          ),
+                          backgroundColor:
+                              const Color.fromARGB(255, 80, 180, 210),
                           padding: const EdgeInsets.symmetric(vertical: 18),
                           minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
@@ -290,23 +211,34 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
                           );
                         },
                         child: const Text(
-                          "Aprender mais sobre",
+                          "Aprender mais",
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
 
                       const SizedBox(height: 15),
 
+                      // 🔥 VOLTAR PRO INÍCIO DE VERDADE
                       GestureDetector(
-                        onTap: () => Navigator.pop(context),
+                        onTap: () => Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const HomePage()),
+                          (route) => false,
+                        ),
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 18),
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
                             borderRadius: BorderRadius.circular(30),
+                            color: Colors.white.withOpacity(0.7),
                           ),
-                          child: const Center(child: Text("Voltar ao Início")),
+                          child: const Center(
+                            child: Text(
+                              "Voltar ao início",
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                          ),
                         ),
                       ),
 
@@ -321,8 +253,96 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
       ),
     );
   }
+
+  Widget _toggleButton(String text, bool isLeft) {
+    bool ativo = isLeft ? mostrarResultados : !mostrarResultados;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            mostrarResultados = isLeft;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: ativo
+                ? const Color.fromARGB(255, 255, 120, 149)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: ativo ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 🔥 BOX BONITO COM LISTA OU TEXTO
+  Widget _contentBox({
+    required Color color,
+    required IconData icon,
+    required String title,
+    List<String>? items,
+    String? description,
+  }) {
+    return AnimatedBorderBox(
+      controller: _borderController,
+      color: color,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: color.withOpacity(0.2),
+                  child: Icon(icon, color: color, size: 18),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            if (description != null) Text(description),
+
+            if (items != null)
+              ...items.map(
+                (e) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text("• $e"),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
+// legenda
 class _Legend extends StatelessWidget {
   final Color color;
   final String text;
