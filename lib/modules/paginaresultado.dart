@@ -2,10 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+
 import 'telaenviar.dart';
 import 'telainicial.dart';
 import 'sobre.dart';
+
 import '../widgets/app_scaffold.dart';
+import '../services/api_service.dart';
 
 class ResultPage extends StatefulWidget {
   final XFile image;
@@ -16,26 +20,108 @@ class ResultPage extends StatefulWidget {
   State<ResultPage> createState() => _ResultPageState();
 }
 
-class _ResultPageState extends State<ResultPage>
-    with TickerProviderStateMixin {
+class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
   late AnimationController _borderController;
 
+  // controla aba selecionada (resultados / explicação)
   bool mostrarResultados = true;
+
+  Map<String, dynamic>? resultado;
+  bool carregando = true;
 
   @override
   void initState() {
     super.initState();
 
+    // animação da borda da imagem
     _borderController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat();
+
+    // chama API ao abrir a página
+    _carregarResultado();
+  }
+
+  /// chama a api
+  Future<void> _carregarResultado() async {
+    try {
+      final res = await ApiService.analisarImagem(widget.image);
+
+      setState(() {
+        resultado = res;
+        carregando = false;
+      });
+    } catch (e) {
+      setState(() {
+        carregando = false;
+      });
+
+      print("Erro na API: $e");
+    }
   }
 
   @override
   void dispose() {
     _borderController.dispose();
     super.dispose();
+  }
+
+  // interface com resultados
+  Widget _buildResultados() {
+    if (resultado == null) {
+      return const Text("Nenhum resultado encontrado.");
+    }
+
+    final List deteccoes = resultado!["deteccoes"] ?? [];
+    final int quantidade = resultado!["quantidade_deteccoes"] ?? 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // quantidade total
+        Text(
+          "Objetos detectados: $quantidade",
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(height: 20),
+
+        // lista de detecções
+        ...deteccoes.map<Widget>((d) {
+          final nome = d["nome"] ?? "desconhecido";
+          final confianca = (d["confianca"] ?? 0) * 100;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Objeto: $nome",
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  "Confiança: ${confianca.toStringAsFixed(1)}%",
+                  style: const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ],
+    );
   }
 
   @override
@@ -57,6 +143,7 @@ class _ResultPageState extends State<ResultPage>
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
+                      // botão voltar
                       Row(
                         children: [
                           IconButton(
@@ -78,43 +165,29 @@ class _ResultPageState extends State<ResultPage>
 
                       const SizedBox(height: 25),
 
-                      // 🔥 IMAGEM
+                      // imagem com animação de borda
                       AnimatedBorderBox(
                         controller: _borderController,
-                        child: Column(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(20),
-                              child: kIsWeb
-                                  ? Image.network(
-                                      widget.image.path,
-                                      height: 200,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.file(
-                                      File(widget.image.path),
-                                      height: 200,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
-                                _Legend(color: Colors.green, text: "Padrão típico"),
-                                SizedBox(width: 20),
-                                _Legend(color: Colors.red, text: "Atenção"),
-                              ],
-                            ),
-                          ],
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: kIsWeb
+                              ? Image.network(
+                                  widget.image.path,
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                )
+                              : Image.file(
+                                  File(widget.image.path),
+                                  height: 200,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
                         ),
                       ),
 
                       const SizedBox(height: 25),
 
-                      // 🔥 TOGGLE
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -131,71 +204,32 @@ class _ResultPageState extends State<ResultPage>
 
                       const SizedBox(height: 25),
 
-                      // 🔥 CONTEÚDO BONITO
+                      //resultado OU explicação)
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
-                        child: mostrarResultados
-                            ? Column(
-                                key: const ValueKey(1),
-                                children: [
-                                  _contentBox(
-                                    color: Colors.green,
-                                    icon: Icons.check_circle,
-                                    title: "Pontos Positivos",
-                                    items: [
-                                      "Uso equilibrado do espaço",
-                                      "Boa repetição de padrões",
-                                      "Coordenação motora consistente",
-                                      "Distribuição organizada",
-                                    ],
-                                  ),
-                                  const SizedBox(height: 20),
-                                  _contentBox(
-                                    color: Colors.red,
-                                    icon: Icons.warning,
-                                    title: "Pontos de Atenção",
-                                    items: [
-                                      "Concentração em áreas específicas",
-                                      "Sobreposição de traços",
-                                      "Possível dificuldade de organização",
-                                      "Variação de pressão",
-                                    ],
-                                  ),
-                                ],
+                        child: carregando
+                            ? const Center(
+                                key: ValueKey("loading"),
+                                child: CircularProgressIndicator(),
                               )
-                            : Column(
-                                key: const ValueKey(2),
-                                children: [
-                                  _contentBox(
-                                    color: Colors.amber,
-                                    icon: Icons.psychology,
-                                    title: "Como funciona",
-                                    description:
-                                        "A análise observa padrões no desenho como organização, repetição e controle do traço.\n\nEsses elementos ajudam a entender o desenvolvimento cognitivo.",
-                                  ),
-                                  const SizedBox(height: 20),
-                                  _contentBox(
-                                    color: Colors.blue,
-                                    icon: Icons.analytics,
-                                    title: "O que é analisado",
-                                    items: [
-                                      "Organização espacial",
-                                      "Repetição de padrões",
-                                      "Intensidade do traço",
-                                      "Controle motor",
-                                      "Distribuição visual",
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            : mostrarResultados
+                            // mostra resultados
+                            ? _buildResultados()
+                            // explicação futura
+                            : const Text("Explicação ainda não implementada"),
                       ),
 
                       const SizedBox(height: 30),
 
+                      // botão aprender mais
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 80, 180, 210),
+                          backgroundColor: const Color.fromARGB(
+                            255,
+                            80,
+                            180,
+                            210,
+                          ),
                           padding: const EdgeInsets.symmetric(vertical: 18),
                           minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
@@ -218,12 +252,11 @@ class _ResultPageState extends State<ResultPage>
 
                       const SizedBox(height: 15),
 
-                      // 🔥 VOLTAR PRO INÍCIO DE VERDADE
+                      // voltar ao início
                       GestureDetector(
                         onTap: () => Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const HomePage()),
+                          MaterialPageRoute(builder: (_) => const HomePage()),
                           (route) => false,
                         ),
                         child: Container(
@@ -233,12 +266,7 @@ class _ResultPageState extends State<ResultPage>
                             borderRadius: BorderRadius.circular(30),
                             color: Colors.white.withOpacity(0.7),
                           ),
-                          child: const Center(
-                            child: Text(
-                              "Voltar ao início",
-                              style: TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                          ),
+                          child: const Center(child: Text("Voltar ao início")),
                         ),
                       ),
 
@@ -254,6 +282,7 @@ class _ResultPageState extends State<ResultPage>
     );
   }
 
+  /// 🔥 botão do toggle (Resultados / Explicação)
   Widget _toggleButton(String text, bool isLeft) {
     bool ativo = isLeft ? mostrarResultados : !mostrarResultados;
 
@@ -264,8 +293,7 @@ class _ResultPageState extends State<ResultPage>
             mostrarResultados = isLeft;
           });
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+        child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: ativo
@@ -276,87 +304,11 @@ class _ResultPageState extends State<ResultPage>
           child: Center(
             child: Text(
               text,
-              style: TextStyle(
-                color: ativo ? Colors.white : Colors.black,
-                fontWeight: FontWeight.w500,
-              ),
+              style: TextStyle(color: ativo ? Colors.white : Colors.black),
             ),
           ),
         ),
       ),
-    );
-  }
-
-  // 🔥 BOX BONITO COM LISTA OU TEXTO
-  Widget _contentBox({
-    required Color color,
-    required IconData icon,
-    required String title,
-    List<String>? items,
-    String? description,
-  }) {
-    return AnimatedBorderBox(
-      controller: _borderController,
-      color: color,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: color.withOpacity(0.2),
-                  child: Icon(icon, color: color, size: 18),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            if (description != null) Text(description),
-
-            if (items != null)
-              ...items.map(
-                (e) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Text("• $e"),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// legenda
-class _Legend extends StatelessWidget {
-  final Color color;
-  final String text;
-
-  const _Legend({required this.color, required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CircleAvatar(radius: 6, backgroundColor: color),
-        const SizedBox(width: 5),
-        Text(text),
-      ],
     );
   }
 }
