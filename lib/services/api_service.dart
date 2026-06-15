@@ -1,19 +1,11 @@
-import 'dart:convert';
+    import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter/foundation.dart';
 
 class ApiService {
 
-  static String get baseUrl {
-    if (kIsWeb) {
-      // web Chrome
-      return "http://localhost:8000";
-    } else {
-      // Android Emulator
-      return "http://10.0.2.2:8000";
-    }
-  }
+  static const String baseUrl =
+      "https://neurosketch-api.onrender.com";
 
   static Future<Map<String, dynamic>> analisarImagem(XFile image) async {
 
@@ -22,7 +14,6 @@ class ApiService {
       Uri.parse('$baseUrl/analisar'),
     );
 
-    
     final bytes = await image.readAsBytes();
 
     request.files.add(
@@ -35,6 +26,8 @@ class ApiService {
 
     var response = await request.send();
     var responseData = await response.stream.bytesToString();
+
+    print(responseData);
 
     if (response.statusCode != 200) {
       throw Exception("Erro na API: $responseData");
