@@ -67,6 +67,34 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  final Map<String, String> traducoes = {
+    "cat": "Gato",
+    "dog": "Cachorro",
+    "person": "Pessoa",
+    "bird": "Pássaro",
+    "car": "Carro",
+    // suas outras classes...
+  };
+
+  final Map<String, String> explicacoes = {
+    "cat":
+        "Os gatos são mamíferos domésticos conhecidos por sua independência, agilidade e comportamento curioso.",
+
+    "dog":
+        "Os cães são animais domesticados há milhares de anos e conhecidos pela lealdade aos seres humanos.",
+
+    "person":
+        "Uma pessoa foi identificada na imagem. O modelo reconheceu características corporais humanas.",
+
+    "bird":
+        "As aves são animais vertebrados com penas e bico, adaptados para voo ou locomoção terrestre.",
+
+    "car":
+        "Um carro é um veículo terrestre utilizado para transporte de pessoas e cargas.",
+
+    // demais classes...
+  };
+
   // interface com resultados
   Widget _buildResultados() {
     if (resultado == null) {
@@ -80,30 +108,63 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // quantidade total
-        Text(
-          "Objetos detectados: $quantidade",
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 15),
+            ],
+          ),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.psychology,
+                size: 50,
+                color: Color.fromARGB(255, 80, 180, 210),
+              ),
 
+              const SizedBox(height: 10),
+
+              Center(
+                child: Text(
+                  "$quantidade elementos detectados",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+                ),
+              ),
+            ],
+          ),
+        ),
         const SizedBox(height: 20),
 
         // lista de detecções
         ...deteccoes.map<Widget>((d) {
-          final nome = d["nome"] ?? "desconhecido";
+          final classeOriginal = d["nome"] ?? "desconhecido";
+
+          final nome = traducoes[classeOriginal] ?? classeOriginal;
           final confianca = (d["confianca"] ?? 0) * 100;
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.1),
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Objeto: $nome",
+                  "✨ $nome identificado",
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -112,10 +173,17 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                 const SizedBox(height: 6),
 
-                Text(
-                  "Confiança: ${confianca.toStringAsFixed(1)}%",
-                  style: const TextStyle(fontSize: 14),
-                ),
+                const Text("O modelo encontrou este elemento na imagem."),
+
+                const SizedBox(height: 6),
+
+                const SizedBox(height: 10),
+
+                Text("Precisão: ${confianca.toStringAsFixed(1)}%"),
+
+                const SizedBox(height: 10),
+
+                LinearProgressIndicator(value: confianca / 100, minHeight: 8),
               ],
             ),
           );
@@ -124,12 +192,63 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildExplicacoes() {
+    if (resultado == null) {
+      return const Text("Nenhuma explicação disponível.");
+    }
+
+    final List deteccoes = resultado!["deteccoes"] ?? [];
+
+    return Column(
+      children: deteccoes.map<Widget>((d) {
+        final classe = d["nome"] ?? "";
+
+        final nome = traducoes[classe] ?? classe;
+
+        final explicacao =
+            explicacoes[classe] ?? "Nenhuma explicação disponível.";
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                nome,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 8),
+
+              Text(explicacao),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     bool isDesktop = width > 800;
     double maxWidth = isDesktop ? 500 : double.infinity;
-
     return AppScaffold(
       body: Stack(
         children: [
@@ -213,10 +332,8 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
                                 child: CircularProgressIndicator(),
                               )
                             : mostrarResultados
-                            // mostra resultados
                             ? _buildResultados()
-                            // explicação futura
-                            : const Text("Explicação ainda não implementada"),
+                            : _buildExplicacoes(),
                       ),
 
                       const SizedBox(height: 30),
