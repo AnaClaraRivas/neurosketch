@@ -44,15 +44,22 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
   }
 
   /// chama a api
+/// chama a api de forma segura
   Future<void> _carregarResultado() async {
     try {
       final res = await ApiService.analisarImagem(widget.image);
+
+      // CRUCIAL: Se o usuário saiu da tela enquanto a API carregava, para aqui e não chama o setState
+      if (!mounted) return;
 
       setState(() {
         resultado = res;
         carregando = false;
       });
     } catch (e) {
+      // CRUCIAL: Mesma checagem caso aconteça um erro na requisição
+      if (!mounted) return;
+
       setState(() {
         carregando = false;
       });
