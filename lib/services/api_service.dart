@@ -4,7 +4,7 @@ import 'package:http_parser/http_parser.dart'; // Importante para definir o tipo
 import 'package:image_picker/image_picker.dart';
 
 class ApiService {
-  static const String baseUrl = "https://neurosketch-api.onrender.com";
+  static const String baseUrl = "https://neurosketchapi.onrender.com";
 
   static Future<Map<String, dynamic>> analisarImagem(XFile image) async {
     var request = http.MultipartRequest(
