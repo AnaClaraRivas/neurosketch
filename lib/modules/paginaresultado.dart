@@ -23,7 +23,7 @@ class ResultPage extends StatefulWidget {
 class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
   late AnimationController _borderController;
 
-  // controla aba selecionada (resultados / explicação)
+  // controla qual aba está aparecendo
   bool mostrarResultados = true;
 
   Map<String, dynamic>? resultado;
@@ -39,17 +39,16 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
       duration: const Duration(seconds: 2),
     )..repeat();
 
-    // chama API ao abrir a página
+    // chama a api quando a página abre
     _carregarResultado();
   }
 
-  /// chama a api
-/// chama a api de forma segura
+  // pega o resultado da api
   Future<void> _carregarResultado() async {
     try {
       final res = await ApiService.analisarImagem(widget.image);
 
-      // CRUCIAL: Se o usuário saiu da tela enquanto a API carregava, para aqui e não chama o setState
+      // se a pessoa saiu da página enquanto carregava, para aqui
       if (!mounted) return;
 
       setState(() {
@@ -57,14 +56,14 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
         carregando = false;
       });
     } catch (e) {
-      // CRUCIAL: Mesma checagem caso aconteça um erro na requisição
+      // evita erro se a página não estiver mais aberta
       if (!mounted) return;
 
       setState(() {
         carregando = false;
       });
 
-      print("Erro na API: $e");
+      print("erro na api: $e");
     }
   }
 
@@ -74,15 +73,17 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  // nomes que podem ser traduzidos para aparecer na tela
   final Map<String, String> traducoes = {
     "cat": "Gato",
     "dog": "Cachorro",
     "person": "Pessoa",
+    "figura_humana": "Figura humana",
     "bird": "Pássaro",
     "car": "Carro",
-    // suas outras classes...
   };
 
+  // explicações para outras classes, caso existam
   final Map<String, String> explicacoes = {
     "cat":
         "Os gatos são mamíferos domésticos conhecidos por sua independência, agilidade e comportamento curioso.",
@@ -98,11 +99,9 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
     "car":
         "Um carro é um veículo terrestre utilizado para transporte de pessoas e cargas.",
-
-    // demais classes...
   };
 
-  // interface com resultados
+  // mostra os resultados encontrados pelo modelo
   Widget _buildResultados() {
     if (resultado == null) {
       return const Text("Nenhum resultado encontrado.");
@@ -114,7 +113,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // quantidade total
+        // mostra a quantidade de elementos encontrados
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -144,13 +143,15 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
             ],
           ),
         ),
+
         const SizedBox(height: 20),
 
-        // lista de detecções
+        // mostra cada detecção encontrada
         ...deteccoes.map<Widget>((d) {
           final classeOriginal = d["nome"] ?? "desconhecido";
 
           final nome = traducoes[classeOriginal] ?? classeOriginal;
+
           final confianca = (d["confianca"] ?? 0) * 100;
 
           return Container(
@@ -170,19 +171,27 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "✨ $nome identificado",
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle_outline,
+                      size: 22,
+                      color: Colors.green,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "$nome identificada",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 6),
 
                 const Text("O modelo encontrou este elemento na imagem."),
-
-                const SizedBox(height: 6),
 
                 const SizedBox(height: 10),
 
@@ -199,6 +208,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     );
   }
 
+  // mostra a explicação dependendo do resultado do modelo
   Widget _buildExplicacoes() {
     if (resultado == null) {
       return const Text("Nenhuma explicação disponível.");
@@ -206,48 +216,120 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
     final List deteccoes = resultado!["deteccoes"] ?? [];
 
-    return Column(
-      children: deteccoes.map<Widget>((d) {
-        final classe = d["nome"] ?? "";
+    // verifica se o modelo encontrou alguma figura humana
+    if (deteccoes.isNotEmpty) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Presença de figura humana",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
 
-        final nome = traducoes[classe] ?? classe;
+            const SizedBox(height: 10),
 
-        final explicacao =
-            explicacoes[classe] ?? "Nenhuma explicação disponível.";
+            const Text(
+              "O modelo identificou a presença de uma figura humana na imagem.",
+            ),
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
+            const SizedBox(height: 15),
 
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 10,
-                offset: Offset(0, 4),
+            const Text(
+              "A representação da figura humana foi definida como "
+              "um primeiro elemento de análise por sua relevância "
+              "nos estudos sobre desenhos infantis. Esse elemento "
+              "pode estar relacionado à forma como a criança "
+              "representa a si mesma e envolve dimensões cognitivas, "
+              "emocionais e socioculturais presentes em seu processo "
+              "de desenvolvimento.",
+            ),
+
+            const SizedBox(height: 12),
+
+            const Text(
+              "Neste projeto, a identificação da figura humana é "
+              "utilizada como um critério de análise da imagem e "
+              "não como uma avaliação ou diagnóstico sobre a criança.",
+            ),
+
+            const SizedBox(height: 15),
+
+            const Text(
+              "Fonte: Nunes, Ferreira e Wiggers (2026). “Colorindo” a imagem corporal: vivências e significados em desenhos infantis de figura humana. Revista Pesquisa Qualitativa.",
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey,
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                nome,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            ),
+          ],
+        ),
+      );
+    }
 
-              const SizedBox(height: 8),
-
-              Text(explicacao),
-            ],
+    // se não encontrou nenhuma figura humana
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-        );
-      }).toList(),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Ausência de figura humana",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 10),
+
+          const Text("O modelo não identificou uma figura humana na imagem."),
+
+          const SizedBox(height: 15),
+
+          const Text(
+            "Esse resultado representa apenas uma característica visual "
+            "observada nesta produção. A ausência da figura humana, "
+            "por si só, não permite concluir nada sobre o desenvolvimento, "
+            "comportamento ou características da criança. Por isso, o "
+            "resultado deve ser considerado dentro do contexto da produção "
+            "e como um recurso de apoio à observação.",
+          ),
+          const SizedBox(height: 15),
+
+          const Text(
+            "Fonte: Nunes, Ferreira e Wiggers (2026). “Colorindo” a imagem corporal: vivências e significados em desenhos infantis de figura humana. Revista Pesquisa Qualitativa.",
+            style: TextStyle(
+              fontSize: 12,
+              fontStyle: FontStyle.italic,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -256,6 +338,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     double width = MediaQuery.of(context).size.width;
     bool isDesktop = width > 800;
     double maxWidth = isDesktop ? 500 : double.infinity;
+
     return AppScaffold(
       body: Stack(
         children: [
@@ -269,7 +352,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      // botão voltar
+                      // botão para voltar
                       Row(
                         children: [
                           IconButton(
@@ -291,7 +374,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 25),
 
-                      // imagem com animação de borda
+                      // mostra a imagem que foi enviada
                       AnimatedBorderBox(
                         controller: _borderController,
                         child: ClipRRect(
@@ -314,6 +397,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 25),
 
+                      // botão para trocar entre resultados e explicação
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -330,7 +414,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 25),
 
-                      //resultado OU explicação)
+                      // mostra a aba escolhida
                       AnimatedSwitcher(
                         duration: const Duration(milliseconds: 300),
                         child: carregando
@@ -345,7 +429,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 30),
 
-                      // botão aprender mais
+                      // botão para abrir a página com mais informações
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color.fromARGB(
@@ -376,7 +460,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
 
                       const SizedBox(height: 15),
 
-                      // voltar ao início
+                      // volta para a tela inicial
                       GestureDetector(
                         onTap: () => Navigator.pushAndRemoveUntil(
                           context,
@@ -406,7 +490,7 @@ class _ResultPageState extends State<ResultPage> with TickerProviderStateMixin {
     );
   }
 
-  /// 🔥 botão do toggle (Resultados / Explicação)
+  // cria os botões das abas
   Widget _toggleButton(String text, bool isLeft) {
     bool ativo = isLeft ? mostrarResultados : !mostrarResultados;
 

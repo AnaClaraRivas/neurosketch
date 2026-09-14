@@ -64,8 +64,8 @@ class _UploadPageState extends State<UploadPage> with TickerProviderStateMixin {
     bool isDesktop = width > 800;
     double maxWidth = isDesktop ? 500 : double.infinity;
 
-return AppScaffold(
-  body: Stack(
+    return AppScaffold(
+      body: Stack(
         children: [
           const Positioned.fill(child: IconBackground()),
 
@@ -85,7 +85,6 @@ return AppScaffold(
                             icon: const Icon(Icons.arrow_back),
                             onPressed: () => Navigator.pop(context),
                           ),
-                          
                         ],
                       ),
 
@@ -100,7 +99,6 @@ return AppScaffold(
                       ),
 
                       const SizedBox(height: 25),
-                      
 
                       const SizedBox(height: 30),
 
@@ -190,6 +188,30 @@ return AppScaffold(
 
                       AnimatedBorderBox(
                         controller: _borderController,
+                        color: Colors.blue,
+                        child: Row(
+                          children: const [
+                            CircleAvatar(
+                              backgroundColor: Color.fromARGB(60, 33, 150, 243),
+                              child: Icon(
+                                Icons.auto_awesome,
+                                color: Colors.blue,
+                              ),
+                            ),
+                            SizedBox(width: 15),
+                            Expanded(
+                              child: Text(
+                                "Escolha um desenho para que a plataforma possa analisar a presença ou ausência de figuras humanas no desenho.",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      AnimatedBorderBox(
+                        controller: _borderController,
                         color: Colors.amber,
                         child: Row(
                           children: const [
@@ -201,30 +223,6 @@ return AppScaffold(
                             Expanded(
                               child: Text(
                                 "Fotografe com boa iluminação e mantenha a câmera paralela ao papel",
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
-
-                      AnimatedBorderBox(
-                        controller: _borderController,
-                        color: Colors.blue,
-                        child: Row(
-                          children: const [
-                            CircleAvatar(
-                              backgroundColor: Color.fromARGB(60, 33, 150, 243),
-                              child: Icon(
-                                Icons.access_time,
-                                color: Colors.blue,
-                              ),
-                            ),
-                            SizedBox(width: 15),
-                            Expanded(
-                              child: Text(
-                                "Desenhos serão salvos automaticamente",
                               ),
                             ),
                           ],
@@ -248,7 +246,9 @@ return AppScaffold(
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => ResultPage(image: _image!),                                  ),
+                                    builder: (context) =>
+                                        ResultPage(image: _image!),
+                                  ),
                                 );
                               },
                         child: const Text(
