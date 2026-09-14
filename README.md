@@ -1,4 +1,3 @@
-````markdown
 # NeuroSketch
 
 Aplicação desenvolvida em **Flutter**, uma ferramenta de apoio à análise de desenhos infantis utilizando inteligência artificial e visão computacional.
